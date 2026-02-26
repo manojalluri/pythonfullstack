@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <h1 class="animate-fade-in">Learn Without Limits</h1>
+                <p class="animate-fade-in" style="animation-delay: 0.1s;">Discover a world of knowledge with our comprehensive online learning platform. Access courses, submit assignments, and track your progress all in one place.</p>
+                <div class="d-flex gap-3 animate-fade-in" style="animation-delay: 0.2s;">
+                    <a href="{% url 'register' %}" class="btn btn-light btn-lg px-4">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Start Learning
+                    </a>
+                    <a href="{% url 'course_list' %}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="bi bi-search me-2"></i>Explore Courses
+                    </a>
+                </div>
+                <div class="mt-5 d-flex gap-4 animate-fade-in" style="animation-delay: 0.3s;">
+                    <div class="text-white">
+                        <h3 class="fw-bold mb-0">10K+</h3>
+                        <small class="opacity-75">Students</small>
+                    </div>
+                    <div class="text-white">
+                        <h3 class="fw-bold mb-0">500+</h3>
+                        <small class="opacity-75">Courses</small>
+                    </div>
+                    <div class="text-white">
+                        <h3 class="fw-bold mb-0">100+</h3>
+                        <small class="opacity-75">Instructors</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="position-relative">
+                    <div class="card border-0 shadow-lg" style="transform: rotate(-3deg);">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                                    <i class="bi bi-book fs-3 text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Python Programming</h6>
+                                    <small class="text-muted">Web Development</small>
+                                </div>
+                            </div>
+                            <div class="progress mb-2" style="height: 8px;">
+                                <div class="progress-bar" style="width: 75%"></div>
+                            </div>
+                            <small class="text-muted">75% Complete</small>
+                        </div>
+                    </div>
+                    <div class="card border-0 shadow-lg position-absolute" style="top: 120px; right: -20px; transform: rotate(5deg);">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-3 me-3">
+                                    <i class="bi bi-check-circle fs-3 text-success"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Assignment Submitted!</h6>
+                                    <small class="text-muted">Data Structures Quiz</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold mb-3">Why Choose Our LMS?</h2>
+            <p class="text-muted">Everything you need to succeed in your learning journey</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="bi bi-laptop fs-2 text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Online Learning</h5>
+                        <p class="text-muted">Access courses anytime, anywhere. Learn at your own pace with our flexible online platform.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="bi bi-people fs-2 text-success"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Expert Instructors</h5>
+                        <p class="text-muted">Learn from industry experts and experienced educators who are passionate about teaching.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="bi bi-graph-up fs-2 text-warning"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Track Progress</h5>
+                        <p class="text-muted">Monitor your learning progress with detailed analytics and achievement tracking.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Courses -->
+<section class="py-5 bg-light">
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold mb-2">Featured Courses</h2>
+                <p class="text-muted mb-0">Start learning with our most popular courses</p>
+            </div>
+            <a href="{% url 'course_list' %}" class="btn btn-outline-primary">View All Courses</a>
+        </div>
+        <div class="row g-4">
+            {% for course in featured_courses %}
+            <div class="col-md-4">
+                <div class="card course-card h-100">
+                    {% if course.cover_image %}
+                        <img src="{{ course.cover_image.url }}" class="card-img-top" alt="{{ course.title }}">
+                    {% else %}
+                        <div class="card-img-top bg-primary d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-book fs-1 text-white"></i>
+                        </div>
+                    {% endif %}
+                    <span class="badge bg-success">{{ course.difficulty|title }}</span>
+                    <div class="card-body">
+                        <small class="text-muted text-uppercase fw-semibold">{{ course.category|default:"General" }}</small>
+                        <h5 class="card-title fw-bold mt-2 mb-2">{{ course.title }}</h5>
+                        <p class="card-text text-muted">{{ course.description|truncatewords:15 }}</p>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-person-circle me-2 text-primary"></i>
+                            <small class="text-muted">{{ course.instructor.get_full_name|default:course.instructor.username }}</small>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="bi bi-people me-1"></i>
+                                <small>{{ course.enrolled_count }} students</small>
+                            </div>
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="bi bi-clock me-1"></i>
+                                <small>{{ course.duration }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 p-3">
+                        <a href="{% url 'course_detail' course.id %}" class="btn btn-primary w-100">View Course</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No courses available yet. Check back soon!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="card border-0" style="background: var(--gradient-2);">
+            <div class="card-body p-5 text-center text-white">
+                <h2 class="fw-bold mb-3">Ready to Start Learning?</h2>
+                <p class="mb-4 opacity-75">Join thousands of students already learning on our platform. Sign up for free today!</p>
+                <a href="{% url 'register' %}" class="btn btn-light btn-lg px-5">
+                    <i class="bi bi-person-plus me-2"></i>Create Free Account
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

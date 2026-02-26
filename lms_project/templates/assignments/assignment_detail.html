@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ assignment.title }} - Details - LMS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'course_detail' assignment.course.id %}">{{
+                            assignment.course.title }}</a></li>
+                    <li class="breadcrumb-item active">{{ assignment.title }}</li>
+                </ol>
+            </nav>
+
+            <div class="card mb-4">
+                <div class="card-header bg-transparent py-3">
+                    <h3 class="fw-bold mb-0">{{ assignment.title }}</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="bi bi-calendar-event text-primary"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block">Due Date</small>
+                                    <span class="fw-semibold">{{ assignment.due_date|date:"F d, Y H:i" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="bi bi-trophy text-success"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block">Max Score</small>
+                                    <span class="fw-semibold">{{ assignment.max_score }} Points</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-info bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="bi bi-bookmark-star text-info"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block">Type</small>
+                                    <span class="fw-semibold">{{ assignment.get_assignment_type_display }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mb-3">Description</h5>
+                    <div class="text-muted mb-4">
+                        {{ assignment.description|linebreaks }}
+                    </div>
+
+                    {% if assignment.instructions %}
+                    <h5 class="fw-bold mb-3">Instructions</h5>
+                    <div class="alert alert-light border">
+                        {{ assignment.instructions|linebreaks }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if user.is_student %}
+            <div class="card border-primary mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">My Submission</h5>
+                    </div>
+                    {% if submissions %}
+                    {% with submission=submissions.0 %}
+                    <div class="p-3 bg-light rounded mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Status:</span>
+                            <span
+                                class="badge {% if submission.status == 'graded' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                {{ submission.get_status_display }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Submitted on:</span>
+                            <span>{{ submission.submitted_at|date:"M d, Y H:i" }}</span>
+                        </div>
+                        {% if submission.is_late %}
+                        <small class="text-danger mt-1 d-block"><i class="bi bi-exclamation-triangle me-1"></i>Submitted
+                            Late</small>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'submit_assignment' assignment.id %}" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-pencil me-2"></i>{% if submission.status == 'submitted' %}Edit Submission{% else
+                        %}View Submission{% endif %}
+                    </a>
+                    {% endwith %}
+                    {% else %}
+                    <div class="text-center py-3">
+                        <p class="text-muted mb-3">You haven't submitted this assignment yet.</p>
+                        <a href="{% url 'submit_assignment' assignment.id %}" class="btn btn-primary w-100">
+                            <i class="bi bi-upload me-2"></i>Submit Now
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            {% if user == assignment.course.instructor or user.is_admin %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="fw-bold mb-0">Submissions</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for sub in submissions %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">{{ sub.student.get_full_name|default:sub.student.username }}</h6>
+                                <small class="text-muted">{{ sub.submitted_at|date:"M d, H:i" }}</small>
+                            </div>
+                            <a href="{% url 'grade_submission' sub.id %}" class="btn btn-sm btn-outline-primary">
+                                {% if sub.status == 'graded' %}Review{% else %}Grade{% endif %}
+                            </a>
+                        </div>
+                        {% empty %}
+                        <div class="p-4 text-center text-muted">
+                            No submissions yet.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="fw-bold mb-0">Course Info</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="fw-bold">{{ assignment.course.title }}</h6>
+                    <p class="text-muted small mb-3">{{ assignment.course.description|truncatewords:20 }}</p>
+                    <a href="{% url 'course_detail' assignment.course.id %}" class="btn btn-sm btn-light w-100">View
+                        Course</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Assignment - LMS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Assignment</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Select Course</label>
+                            <select name="course" class="form-select" required>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Assignment Title</label>
+                            <input type="text" name="title" class="form-control" placeholder="Enter assignment title" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="3" placeholder="Brief description of the assignment" required></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Assignment Type</label>
+                                <select name="assignment_type" class="form-select">
+                                    <option value="homework">Homework</option>
+                                    <option value="quiz">Quiz</option>
+                                    <option value="essay">Essay</option>
+                                    <option value="project">Project</option>
+                                    <option value="exam">Exam</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Max Score</label>
+                                <input type="number" name="max_score" class="form-control" value="100" min="1" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Due Date</label>
+                                <input type="datetime-local" name="due_date" class="form-control" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Instructions</label>
+                            <textarea name="instructions" class="form-control" rows="4" placeholder="Detailed instructions for students"></textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i>Create Assignment
+                            </button>
+                            <a href="{% url 'instructor_assignments' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

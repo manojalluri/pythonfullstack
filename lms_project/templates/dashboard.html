@@ -1,0 +1,376 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - LMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-2 col-md-3 dashboard-sidebar">
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="{% url 'dashboard' %}" class="active">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+                {% if user.is_student %}
+                <li>
+                    <a href="{% url 'my_courses' %}">
+                        <i class="bi bi-book"></i> My Courses
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'my_assignments' %}">
+                        <i class="bi bi-file-text"></i> Assignments
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'my_grades' %}">
+                        <i class="bi bi-graph-up"></i> Grades
+                    </a>
+                </li>
+                {% endif %}
+                {% if user.is_instructor %}
+                <li>
+                    <a href="{% url 'instructor_courses' %}">
+                        <i class="bi bi-book"></i> My Courses
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'create_course' %}">
+                        <i class="bi bi-plus-circle"></i> Create Course
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'instructor_assignments' %}">
+                        <i class="bi bi-file-text"></i> Assignments
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'submissions_pending' %}">
+                        <i class="bi bi-inbox"></i> Submissions
+                    </a>
+                </li>
+                {% endif %}
+                {% if user.is_admin %}
+                <li>
+                    <a href="{% url 'admin_dashboard' %}">
+                        <i class="bi bi-shield-check"></i> Admin Panel
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'manage_users' %}">
+                        <i class="bi bi-people"></i> Users
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'manage_courses' %}">
+                        <i class="bi bi-collection"></i> All Courses
+                    </a>
+                </li>
+                {% endif %}
+                <li>
+                    <a href="{% url 'profile' %}">
+                        <i class="bi bi-person"></i> Profile
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-10 col-md-9 py-4">
+            <div class="container">
+                <!-- Welcome Section -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-0" style="background: var(--gradient-1);">
+                            <div class="card-body p-4 text-white">
+                                <div class="d-flex align-items-center">
+                                    {% if user.profile_picture %}
+                                    <img src="{{ user.profile_picture.url }}" alt="" class="rounded-circle me-3"
+                                        width="64" height="64">
+                                    {% else %}
+                                    <div class="bg-white bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center me-3"
+                                        style="width: 64px; height: 64px;">
+                                        <i class="bi bi-person fs-2"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <h4 class="fw-bold mb-1">Welcome back!</h4>
+                                        <p class="mb-0 opacity-75">{{ user.get_role_display }} | Keep up the great work!
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="row g-4 mb-4">
+                    {% if user.is_student %}
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon primary">
+                                <i class="bi bi-book"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">{{ enrolled_courses_count|default:"0" }}</div>
+                                <div class="stat-label">Enrolled Courses</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon success">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">{{ completed_assignments|default:"0" }}</div>
+                                <div class="stat-label">Completed</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon warning">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">{{ pending_assignments|default:"0" }}</div>
+                                <div class="stat-label">Pending</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon danger">
+                                <i class="bi bi-trophy"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">{{ average_grade|default:"0" }}%</div>
+                                <div class="stat-label">Average Grade</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% elif user.is_instructor %}
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon primary">
+                                <i class="bi bi-book"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">{{ courses_count|default:"0" }}</div>
+                                <div class="stat-label">My Courses</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon success">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">{{ total_students|default:"0" }}</div>
+                                <div class="stat-label">Total Students</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon warning">
+                                <i class="bi bi-file-text"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">{{ assignments_count|default:"0" }}</div>
+                                <div class="stat-label">Assignments</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon danger">
+                                <i class="bi bi-inbox"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">{{ pending_submissions|default:"0" }}</div>
+                                <div class="stat-label">Pending Review</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon primary">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">{{ total_users|default:"0" }}</div>
+                                <div class="stat-label">Total Users</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon success">
+                                <i class="bi bi-book"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">{{ total_courses|default:"0" }}</div>
+                                <div class="stat-label">Total Courses</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon warning">
+                                <i class="bi bi-person-workspace"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">{{ total_instructors|default:"0" }}</div>
+                                <div class="stat-label">Instructors</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon danger">
+                                <i class="bi bi-mortarboard"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">{{ total_students|default:"0" }}</div>
+                                <div class="stat-label">Students</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="fw-bold mb-0">
+                                    {% if user.is_student %}
+                                    My Courses
+                                    {% elif user.is_instructor %}
+                                    My Courses
+                                    {% else %}
+                                    Recent Courses
+                                    {% endif %}
+                                </h5>
+                                <a href="{% url 'course_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                            </div>
+                            <div class="card-body">
+                                {% if recent_courses %}
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Course</th>
+                                                <th>Status</th>
+                                                <th>Progress</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in recent_courses %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="bg-primary bg-opacity-10 rounded p-2 me-3">
+                                                            <i class="bi bi-book text-primary"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0">{{ item.title }}</h6>
+                                                            <small class="text-muted">{{ item.instructor_name }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        class="badge {% if item.status == 'published' or item.status == 'active' %}bg-success{% else %}bg-primary{% endif %}">
+                                                        {{ item.status|title }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                                            <div class="progress-bar"
+                                                                style="width: {{ item.progress }}%"></div>
+                                                        </div>
+                                                        <small class="text-muted">{{ item.progress }}%</small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <a href="{% url 'course_detail' item.id %}"
+                                                        class="btn btn-sm btn-primary">
+                                                        <i class="bi bi-arrow-right"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="text-center py-5">
+                                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                                    <p class="text-muted mt-3">No courses available yet.</p>
+                                    {% if user.is_instructor %}
+                                    <a href="{% url 'create_course' %}" class="btn btn-primary">Create Your First
+                                        Course</a>
+                                    {% else %}
+                                    <a href="{% url 'course_list' %}" class="btn btn-primary">Browse Courses</a>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="fw-bold mb-0">
+                                    {% if user.is_student %}
+                                    Upcoming Assignments
+                                    {% elif user.is_instructor %}
+                                    Recent Submissions
+                                    {% else %}
+                                    Recent Activity
+                                    {% endif %}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if recent_activity %}
+                                <div class="list-group list-group-flush">
+                                    {% for activity in recent_activity %}
+                                    <div class="list-group-item px-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                                <i class="bi bi-bell text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ activity.title }}</h6>
+                                                <small class="text-muted">{{ activity.description }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div class="text-center py-4">
+                                    <i class="bi bi-bell-slash fs-1 text-muted"></i>
+                                    <p class="text-muted mt-2">No recent activity</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

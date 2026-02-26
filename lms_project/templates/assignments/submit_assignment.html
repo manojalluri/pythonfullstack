@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Assignment - LMS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'my_assignments' %}">My Assignments</a></li>
+                    <li class="breadcrumb-item active">Submit</li>
+                </ol>
+            </nav>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="fw-bold mb-0"><i class="bi bi-upload me-2"></i>Submit Assignment</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-4 p-3 bg-light rounded">
+                        <h5 class="fw-bold">{{ assignment.title }}</h5>
+                        <p class="text-muted mb-1">{{ assignment.course.title }}</p>
+                        <p class="mb-0">{{ assignment.description }}</p>
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <i class="bi bi-calendar me-1"></i>Due: {{ assignment.due_date|date:"M d, Y H:i" }}
+                            </small>
+                            <small class="text-muted ms-3">
+                                <i class="bi bi-trophy me-1"></i>{{ assignment.max_score }} points
+                            </small>
+                        </div>
+                    </div>
+
+                    {% if assignment.instructions %}
+                    <div class="alert alert-info">
+                        <h6 class="fw-bold"><i class="bi bi-info-circle me-2"></i>Instructions</h6>
+                        <p class="mb-0">{{ assignment.instructions }}</p>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Your Answer / Submission</label>
+                            <textarea name="content" class="form-control" rows="8" placeholder="Enter your answer or submission details here..." required>{{ submission.content|default:'' }}</textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Attach File (optional)</label>
+                            <input type="file" name="file" class="form-control">
+                            {% if submission and submission.file %}
+                            <div class="mt-2">
+                                <small class="text-muted">Current file: {{ submission.file.name }}</small>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send me-2"></i>Submit Assignment
+                            </button>
+                            <a href="{% url 'my_assignments' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

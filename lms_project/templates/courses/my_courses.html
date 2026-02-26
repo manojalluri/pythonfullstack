@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}My Courses - LMS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="fw-bold">My Courses</h1>
+            <p class="text-muted">Continue learning where you left off</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{% url 'course_list' %}" class="btn btn-primary">
+                <i class="bi bi-search me-2"></i>Browse More Courses
+            </a>
+        </div>
+    </div>
+
+    {% if enrollments %}
+    <div class="row g-4">
+        {% for enrollment in enrollments %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                {% if enrollment.course.cover_image %}
+                    <img src="{{ enrollment.course.cover_image.url }}" class="card-img-top" alt="{{ enrollment.course.title }}" style="height: 180px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-primary d-flex align-items-center justify-content-center" style="height: 180px;">
+                        <i class="bi bi-book fs-1 text-white"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <span class="badge bg-{% if enrollment.status == 'active' %}success{% else %}secondary{% endif %} mb-2">
+                        {{ enrollment.status|title }}
+                    </span>
+                    <h5 class="card-title fw-bold">{{ enrollment.course.title }}</h5>
+                    <p class="card-text text-muted small">{{ enrollment.course.description|truncatewords:10 }}</p>
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="text-muted">Progress</small>
+                            <small class="text-muted">{{ enrollment.progress }}%</small>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar" style="width: {{ enrollment.progress }}%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="{% url 'course_detail' enrollment.course.id %}" class="btn btn-primary w-100">
+                        <i class="bi bi-play-circle me-2"></i>Continue Learning
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted"></i>
+            <h4 class="mt-3">No enrolled courses</h4>
+            <p class="text-muted">Start your learning journey by enrolling in a course</p>
+            <a href="{% url 'course_list' %}" class="btn btn-primary">
+                <i class="bi bi-search me-2"></i>Browse Courses
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
