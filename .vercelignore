@@ -1,0 +1,9 @@
+.idea/
+.qoder/
+.git/
+__pycache__/
+*.pyc
+db.sqlite3
+media/
+lms_project/db.sqlite3
+ lms_project/media/

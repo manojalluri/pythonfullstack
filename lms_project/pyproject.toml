@@ -1,0 +1,16 @@
+[project]
+name = "lms-project"
+version = "0.1.0"
+description = "LMS project"
+requires-python = ">=3.12"
+dependencies = [
+    "Django>=5.0",
+    "django-environ",
+    "whitenoise",
+    "gunicorn",
+    "psycopg2-binary",
+    "Pillow",
+]
+
+[tool.uv]
+managed = true
