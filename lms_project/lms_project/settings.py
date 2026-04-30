@@ -35,7 +35,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-default-key-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG', default=False)
+DEBUG = True
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['.vercel.app', 'localhost', '127.0.0.1'])
 
@@ -96,13 +96,25 @@ WSGI_APPLICATION = 'lms_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-if os.environ.get('VERCEL'):
+# Database configuration
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
     DATABASES = {
-        'default': env.db('DATABASE_URL', default='sqlite:////tmp/db.sqlite3')
+        'default': env.db('DATABASE_URL')
     }
 else:
+    # Default to SQLite. On Vercel, we must use /tmp as it is the only writable directory.
+    if os.environ.get('VERCEL') or str(BASE_DIR).startswith('/var/task'):
+        db_path = '/tmp/db.sqlite3'
+    else:
+        db_path = BASE_DIR / 'db.sqlite3'
+    
     DATABASES = {
-        'default': env.db('DATABASE_URL', default=f'sqlite:///{BASE_DIR}/db.sqlite3')
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': str(db_path),
+        }
     }
 
 # PostgreSQL Optimization: Persistent Connections and Health Checks
