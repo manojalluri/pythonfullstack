@@ -10,42 +10,34 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-import environ
-import os
 from pathlib import Path
-
-# Initialize environ
-env = environ.Env(
-    # set casting, default value
-    DEBUG=(bool, False),
-    ALLOWED_HOSTS=(list, ['127.0.0.1', 'localhost']),
-    CSRF_TRUSTED_ORIGINS=(list, []),
-)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Read .env file
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = 'django-insecure-5zx=b0a$%#3ry@w3sb4t-@iqg9sh%7p$wxupmpxb^!9v^mdz6&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+DEBUG = True
 
-ALLOWED_HOSTS = env('ALLOWED_HOSTS')
+ALLOWED_HOSTS = ['*']
 
 # CSRF Settings
-CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS')
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'https://*.antigravity.dev', # Common for cloud IDEs
+]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-CSRF_COOKIE_SECURE = not DEBUG # Secure in production
-SESSION_COOKIE_SECURE = not DEBUG # Secure in production
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_HTTPONLY = False  # Sometimes helps with certain browser setups
 
 
 # Application definition
@@ -95,14 +87,7 @@ WSGI_APPLICATION = 'lms_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': env.db('DATABASE_URL')
-}
-
-# PostgreSQL Optimization: Persistent Connections and Health Checks
-DATABASES['default']['CONN_MAX_AGE'] = 600
-DATABASES['default']['CONN_HEALTH_CHECKS'] = True
-DATABASES['default']['ATOMIC_REQUESTS'] = True
+DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': 'db.sqlite3'}}
 
 
 
@@ -155,13 +140,3 @@ AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
-
-# Message tags for Bootstrap 5 classes
-from django.contrib.messages import constants as django_messages
-MESSAGE_TAGS = {
-    django_messages.DEBUG: 'secondary',
-    django_messages.INFO: 'info',
-    django_messages.SUCCESS: 'success',
-    django_messages.WARNING: 'warning',
-    django_messages.ERROR: 'danger',
-}

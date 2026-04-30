@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Assignment - LMS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white p-4">
+                    <h4 class="fw-bold mb-0">Edit Assignment</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Course</label>
+                            <select name="course" class="form-select" required>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}" {% if course.id == assignment.course.id %}selected{% endif %}>
+                                    {{ course.title }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" name="title" class="form-control" value="{{ assignment.title }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="3">{{ assignment.description }}</textarea>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Assignment Type</label>
+                                <select name="assignment_type" class="form-select">
+                                    <option value="homework" {% if assignment.assignment_type == 'homework' %}selected{% endif %}>Homework</option>
+                                    <option value="quiz" {% if assignment.assignment_type == 'quiz' %}selected{% endif %}>Quiz</option>
+                                    <option value="project" {% if assignment.assignment_type == 'project' %}selected{% endif %}>Project</option>
+                                    <option value="exam" {% if assignment.assignment_type == 'exam' %}selected{% endif %}>Exam</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Max Score</label>
+                                <input type="number" name="max_score" class="form-control" value="{{ assignment.max_score }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Due Date</label>
+                            <input type="datetime-local" name="due_date" class="form-control" value="{{ assignment.due_date|date:'Y-m-d\TH:i' }}" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Instructions</label>
+                            <textarea name="instructions" class="form-control" rows="6">{{ assignment.instructions }}</textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary px-4">Update Assignment</button>
+                            <a href="{% url 'instructor_assignments' %}" class="btn btn-light px-4">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

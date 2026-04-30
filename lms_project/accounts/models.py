@@ -23,12 +23,15 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    @property
     def is_admin(self):
         return self.role == 'admin' or self.is_superuser
     
+    @property
     def is_instructor(self):
         return self.role == 'instructor'
     
+    @property
     def is_student(self):
         return self.role == 'student'
     

@@ -8,7 +8,7 @@ from courses.models import Course, Enrollment
 
 @login_required
 def my_assignments(request):
-    if not request.user.is_student():
+    if not request.user.is_student:
         messages.error(request, 'Access denied.')
         return redirect('dashboard')
     
@@ -34,7 +34,7 @@ def my_assignments(request):
 def submit_assignment(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id)
     
-    if not request.user.is_student():
+    if not request.user.is_student:
         messages.error(request, 'Only students can submit assignments.')
         return redirect('dashboard')
     
@@ -82,7 +82,7 @@ def submit_assignment(request, assignment_id):
 
 @login_required
 def my_grades(request):
-    if not request.user.is_student():
+    if not request.user.is_student:
         messages.error(request, 'Access denied.')
         return redirect('dashboard')
     
@@ -93,7 +93,7 @@ def my_grades(request):
 # Instructor Views
 @login_required
 def instructor_assignments(request):
-    if not request.user.is_instructor():
+    if not request.user.is_instructor:
         messages.error(request, 'Access denied.')
         return redirect('dashboard')
     
@@ -103,11 +103,11 @@ def instructor_assignments(request):
 
 @login_required
 def create_assignment(request):
-    if not request.user.is_instructor():
+    if not request.user.is_instructor and not request.user.is_admin:
         messages.error(request, 'Access denied.')
         return redirect('dashboard')
     
-    courses = Course.objects.filter(instructor=request.user)
+    courses = Course.objects.filter(instructor=request.user) if not request.user.is_admin else Course.objects.all()
     
     if request.method == 'POST':
         course_id = request.POST.get('course')
@@ -135,8 +135,51 @@ def create_assignment(request):
 
 
 @login_required
+def edit_assignment(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    
+    if request.user != assignment.course.instructor and not request.user.is_admin:
+        messages.error(request, 'Access denied.')
+        return redirect('dashboard')
+    
+    courses = Course.objects.filter(instructor=request.user) if not request.user.is_admin else Course.objects.all()
+    
+    if request.method == 'POST':
+        assignment.course_id = request.POST.get('course', assignment.course_id)
+        assignment.title = request.POST.get('title', assignment.title)
+        assignment.description = request.POST.get('description', assignment.description)
+        assignment.assignment_type = request.POST.get('assignment_type', assignment.assignment_type)
+        assignment.max_score = request.POST.get('max_score', assignment.max_score)
+        assignment.due_date = request.POST.get('due_date', assignment.due_date)
+        assignment.instructions = request.POST.get('instructions', assignment.instructions)
+        assignment.save()
+        
+        messages.success(request, 'Assignment updated successfully!')
+        return redirect('instructor_assignments')
+    
+    return render(request, 'assignments/edit_assignment.html', {'assignment': assignment, 'courses': courses})
+
+
+@login_required
+def delete_assignment(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    
+    if request.user != assignment.course.instructor and not request.user.is_admin:
+        messages.error(request, 'Access denied.')
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        title = assignment.title
+        assignment.delete()
+        messages.success(request, f'Assignment "{title}" deleted successfully.')
+        return redirect('instructor_assignments')
+    
+    return render(request, 'assignments/delete_confirm.html', {'item': assignment, 'type': 'assignment'})
+
+
+@login_required
 def submissions_pending(request):
-    if not request.user.is_instructor():
+    if not request.user.is_instructor:
         messages.error(request, 'Access denied.')
         return redirect('dashboard')
     
@@ -150,7 +193,7 @@ def submissions_pending(request):
 
 @login_required
 def grade_submission(request, submission_id):
-    if not request.user.is_instructor():
+    if not request.user.is_instructor:
         messages.error(request, 'Access denied.')
         return redirect('dashboard')
     
@@ -189,14 +232,14 @@ def assignment_detail(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id)
     
     # Check permissions
-    if request.user != assignment.course.instructor and not request.user.is_admin():
+    if request.user != assignment.course.instructor and not request.user.is_admin:
         enrollment = Enrollment.objects.filter(student=request.user, course=assignment.course).first()
         if not enrollment:
             messages.error(request, 'Access denied.')
             return redirect('dashboard')
     
     submissions = None
-    if request.user == assignment.course.instructor or request.user.is_admin():
+    if request.user == assignment.course.instructor or request.user.is_admin:
         submissions = Submission.objects.filter(assignment=assignment).select_related('student')
     else:
         submission = Submission.objects.filter(assignment=assignment, student=request.user).first()

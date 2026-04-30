@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Lesson - LMS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white p-4 d-flex justify-content-between align-items-center">
+                    <h4 class="fw-bold mb-0">Edit Lesson: {{ lesson.title }}</h4>
+                    <span class="text-muted small">Course: {{ course.title }}</span>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Lesson Title</label>
+                            <input type="text" name="title" class="form-control" value="{{ lesson.title }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="3">{{ lesson.description }}</textarea>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Lesson Content (Markdown/HTML supported)</label>
+                            <textarea name="content" class="form-control" rows="10">{{ lesson.content }}</textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Video URL</label>
+                                <input type="url" name="video_url" class="form-control" value="{{ lesson.video_url|default:'' }}" placeholder="https://youtube.com/...">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Duration (min)</label>
+                                <input type="number" name="duration" class="form-control" value="{{ lesson.duration }}" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Order</label>
+                                <input type="number" name="order" class="form-control" value="{{ lesson.order }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+                            <a href="{% url 'edit_course' course.id %}" class="btn btn-light px-4">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Materials Section -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white p-4 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Lesson Materials</h5>
+                    <a href="{% url 'add_material' lesson.id %}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus me-1"></i>Add Material
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if lesson.materials.all %}
+                    <div class="list-group list-group-flush">
+                        {% for material in lesson.materials.all %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light rounded p-2 me-3 text-primary">
+                                    {% if material.material_type == 'pdf' %}<i class="bi bi-file-earmark-pdf"></i>
+                                    {% elif material.material_type == 'video' %}<i class="bi bi-play-circle"></i>
+                                    {% elif material.material_type == 'link' %}<i class="bi bi-link-45deg"></i>
+                                    {% else %}<i class="bi bi-file-earmark"></i>{% endif %}
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">{{ material.title }}</h6>
+                                    <small class="text-muted">{{ material.get_material_type_display }}</small>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'delete_material' material.id %}" class="btn btn-sm btn-light text-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        No materials added to this lesson yet.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

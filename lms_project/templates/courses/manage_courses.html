@@ -100,12 +100,12 @@
                                                     <li><a class="dropdown-item"
                                                             href="{% url 'course_detail' c.id %}"><i
                                                                 class="bi bi-eye me-2"></i>View</a></li>
-                                                    <li><a class="dropdown-item" href="#"><i
+                                                    <li><a class="dropdown-item" href="{% url 'edit_course' c.id %}"><i
                                                                 class="bi bi-pencil me-2"></i>Edit</a></li>
                                                     <li>
                                                         <hr class="dropdown-divider">
                                                     </li>
-                                                    <li><a class="dropdown-item text-danger" href="#"><i
+                                                    <li><a class="dropdown-item text-danger" href="{% url 'delete_course' c.id %}"><i
                                                                 class="bi bi-trash me-2"></i>Delete</a></li>
                                                 </ul>
                                             </div>

@@ -34,7 +34,7 @@ def course_detail(request, course_id):
     lessons = course.lessons.all()
     is_enrolled = False
     
-    if request.user.is_authenticated and request.user.is_student():
+    if request.user.is_authenticated and request.user.is_student:
         is_enrolled = Enrollment.objects.filter(student=request.user, course=course).exists()
     
     context = {
@@ -48,7 +48,7 @@ def course_detail(request, course_id):
 
 @login_required
 def enroll_course(request, course_id):
-    if not request.user.is_student():
+    if not request.user.is_student:
         messages.error(request, 'Only students can enroll in courses.')
         return redirect('course_detail', course_id=course_id)
     
@@ -74,7 +74,7 @@ def enroll_course(request, course_id):
 
 @login_required
 def my_courses(request):
-    if not request.user.is_student():
+    if not request.user.is_student:
         messages.error(request, 'Access denied.')
         return redirect('dashboard')
     
@@ -88,7 +88,7 @@ def lesson_detail(request, lesson_id):
     course = lesson.course
     
     # Check if user is enrolled or is the instructor
-    if request.user != course.instructor and not request.user.is_admin():
+    if request.user != course.instructor and not request.user.is_admin:
         enrollment = Enrollment.objects.filter(student=request.user, course=course).first()
         if not enrollment:
             messages.error(request, 'You must be enrolled in this course to view lessons.')
@@ -109,7 +109,7 @@ def lesson_detail(request, lesson_id):
 # Instructor Views
 @login_required
 def instructor_courses(request):
-    if not request.user.is_instructor():
+    if not request.user.is_instructor:
         messages.error(request, 'Access denied.')
         return redirect('dashboard')
     
@@ -119,7 +119,7 @@ def instructor_courses(request):
 
 @login_required
 def create_course(request):
-    if not request.user.is_instructor():
+    if not request.user.is_instructor:
         messages.error(request, 'Only instructors can create courses.')
         return redirect('dashboard')
     
@@ -154,7 +154,12 @@ def create_course(request):
 
 @login_required
 def edit_course(request, course_id):
-    course = get_object_or_404(Course, id=course_id, instructor=request.user)
+    course = get_object_or_404(Course, id=course_id)
+    
+    # Check if user is instructor or admin
+    if request.user != course.instructor and not request.user.is_admin:
+        messages.error(request, 'Access denied.')
+        return redirect('dashboard')
     
     if request.method == 'POST':
         course.title = request.POST.get('title', course.title)
@@ -170,14 +175,36 @@ def edit_course(request, course_id):
         
         course.save()
         messages.success(request, 'Course updated successfully!')
-        return redirect('instructor_courses')
+        return redirect('instructor_courses') if not request.user.is_admin else redirect('manage_courses')
     
     return render(request, 'courses/edit_course.html', {'course': course})
 
 
 @login_required
+def delete_course(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    
+    # Check if user is instructor or admin
+    if request.user != course.instructor and not request.user.is_admin:
+        messages.error(request, 'Access denied.')
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        course_name = course.title
+        course.delete()
+        messages.success(request, f'Course "{course_name}" deleted successfully.')
+        return redirect('instructor_courses') if not request.user.is_admin else redirect('manage_courses')
+    
+    return render(request, 'courses/delete_confirm.html', {'item': course, 'type': 'course'})
+
+
+@login_required
 def add_lesson(request, course_id):
-    course = get_object_or_404(Course, id=course_id, instructor=request.user)
+    course = get_object_or_404(Course, id=course_id)
+    
+    if request.user != course.instructor and not request.user.is_admin:
+        messages.error(request, 'Access denied.')
+        return redirect('dashboard')
     
     if request.method == 'POST':
         title = request.POST.get('title')
@@ -203,10 +230,103 @@ def add_lesson(request, course_id):
     return render(request, 'courses/add_lesson.html', {'course': course})
 
 
+@login_required
+def edit_lesson(request, lesson_id):
+    lesson = get_object_or_404(Lesson, id=lesson_id)
+    course = lesson.course
+    
+    if request.user != course.instructor and not request.user.is_admin:
+        messages.error(request, 'Access denied.')
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        lesson.title = request.POST.get('title', lesson.title)
+        lesson.description = request.POST.get('description', lesson.description)
+        lesson.content = request.POST.get('content', lesson.content)
+        lesson.video_url = request.POST.get('video_url', lesson.video_url)
+        lesson.duration = request.POST.get('duration', lesson.duration)
+        lesson.order = request.POST.get('order', lesson.order)
+        lesson.save()
+        
+        messages.success(request, 'Lesson updated successfully!')
+        return redirect('edit_course', course_id=course.id)
+    
+    return render(request, 'courses/edit_lesson.html', {'lesson': lesson, 'course': course})
+
+
+@login_required
+def delete_lesson(request, lesson_id):
+    lesson = get_object_or_404(Lesson, id=lesson_id)
+    course = lesson.course
+    
+    if request.user != course.instructor and not request.user.is_admin:
+        messages.error(request, 'Access denied.')
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        lesson_title = lesson.title
+        lesson.delete()
+        messages.success(request, f'Lesson "{lesson_title}" deleted successfully.')
+        return redirect('edit_course', course_id=course.id)
+    
+    return render(request, 'courses/delete_confirm.html', {'item': lesson, 'type': 'lesson'})
+
+
+@login_required
+def add_material(request, lesson_id):
+    lesson = get_object_or_404(Lesson, id=lesson_id)
+    course = lesson.course
+    
+    if request.user != course.instructor and not request.user.is_admin:
+        messages.error(request, 'Access denied.')
+        return redirect('dashboard')
+        
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        material_type = request.POST.get('material_type')
+        url = request.POST.get('url')
+        description = request.POST.get('description')
+        
+        material = Material.objects.create(
+            lesson=lesson,
+            title=title,
+            material_type=material_type,
+            url=url,
+            description=description
+        )
+        
+        if 'file' in request.FILES:
+            material.file = request.FILES['file']
+            material.save()
+            
+        messages.success(request, 'Material added successfully!')
+        return redirect('edit_lesson', lesson_id=lesson.id)
+        
+    return render(request, 'courses/add_material.html', {'lesson': lesson})
+
+
+@login_required
+def delete_material(request, material_id):
+    material = get_object_or_404(Material, id=material_id)
+    lesson = material.lesson
+    
+    if request.user != lesson.course.instructor and not request.user.is_admin:
+        messages.error(request, 'Access denied.')
+        return redirect('dashboard')
+        
+    if request.method == 'POST':
+        material_title = material.title
+        material.delete()
+        messages.success(request, f'Material "{material_title}" deleted successfully.')
+        return redirect('edit_lesson', lesson_id=lesson.id)
+        
+    return render(request, 'courses/delete_confirm.html', {'item': material, 'type': 'material'})
+
+
 # Admin Views
 @login_required
 def manage_courses(request):
-    if not request.user.is_admin():
+    if not request.user.is_admin:
         messages.error(request, 'Access denied.')
         return redirect('dashboard')
     
@@ -216,7 +336,7 @@ def manage_courses(request):
 
 @login_required
 def admin_dashboard(request):
-    if not request.user.is_admin():
+    if not request.user.is_admin:
         messages.error(request, 'Access denied.')
         return redirect('dashboard')
     
